@@ -1,7 +1,7 @@
 # Compiler settings
 CC       := gcc
 CFLAGS   := -Wall -Wextra -O2 -Isrc -Iinclude
-LDFLAGS  := -lavformat -lavcodec -lavutil -lswscale -lSDL2
+LDFLAGS  := -lavformat -lavcodec -lavutil -lswscale -lswresample -lSDL2
 
 # Directory definitions
 SRC_DIR  := src

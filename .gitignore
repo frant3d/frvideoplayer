@@ -1,0 +1,5 @@
+build
+bin
+*.mp4
+*.mp3
+*.webm

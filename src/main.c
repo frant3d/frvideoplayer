@@ -4,6 +4,8 @@
 #include "core/video/decoder/decoder.h"
 #include "core/video/scaler/scaler.h"
 #include "core/video/videoOut/videoOut.h"
+#include "core/video/Time/Time.h"
+
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -15,6 +17,7 @@ int main(int argc, char *argv[]) {
     DecoderCtx decode;
     ScalerCtx scaler;
     VideoOutCtx videoOut;
+    Time time;
     int scaler_initialized = 0;
     int videoOut_initialized = 0;
 
@@ -47,6 +50,7 @@ int main(int argc, char *argv[]) {
     printf("[INFO] Successfully initialized modular media engine!\n");
 
     // Main execution loop -> Read compressed packets until EOF (end of file)
+    time.start = get_time_relative();
     while (av_read_frame(demux.pFormatCtx, pPacket) >= 0) 
     {
         // Intercept desktop OS interactions (e.g. user clicked window "X" button)
@@ -91,8 +95,18 @@ int main(int argc, char *argv[]) {
                     {
                         videOut_FrameRender(&videoOut, scaler.dstData[0], scaler.dstLinesize[0]);
                     }
-                
-                av_frame_unref(decode.pFrame);
+
+                    time.current = get_time_relative();
+                    time.elapsed = time.current - time.start;
+
+                    double pts = get_pts(decode.pFrame, demux.pFormatCtx, demux.videoStream);
+                    double delay = pts - time.elapsed;
+                    if (delay > 0)
+                    {
+                        SDL_Delay((uint32_t)(delay * 1000.0));
+                    }
+
+                    av_frame_unref(decode.pFrame);
             }
             else if (decode_status < 0)
             {
